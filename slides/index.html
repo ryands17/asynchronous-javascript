@@ -40,11 +40,22 @@
 
         <!-- insert meme here -->
         <section>
+          <aside class="notes">
+            We're working with JS and this is what we have to deal with!
+          </aside>
+
           <img src="./assets/meme.jpg" alt="Promises meme" />
         </section>
 
         <!-- topics to be covered -->
         <section>
+          <aside class="notes">
+            Promises are an important part of the JS ecosystem. It's important
+            to know how the event loop works with the execution order of async
+            functions. Also why performance matters and how using Promises
+            incorrectly can cause a bottleneck in your application
+          </aside>
+
           <h2>Why Promises?</h2>
           <ul>
             <li class="fragment fade-up">Understanding the event loop</li>
@@ -60,6 +71,12 @@
         <!-- Understanding the event loop -->
         <section>
           <section>
+            <aside class="notes">
+              Let's look at a basic example of how asynchronous code is
+              executed. Can anyone guess in what order the numbers would be
+              printed in?
+            </aside>
+
             <h3>A basic example</h3>
             <pre><code data-trim class="language-javascript">
               setTimeout(() => { console.log(1) });
@@ -79,6 +96,17 @@
           </section>
 
           <section>
+            <aside class="notes">
+              This is how it works under the hood. The JS engine consists of two
+              parts. The call stack and the Web or Node API's if on the backend.
+              The asynchronous API's like setTimeout and promises are moved to
+              the Web API and passed to the event loop that consists of two
+              queues, micro and macrotasks.<br />
+
+              All async operations are loaded in the queue, prioritised, and
+              passed back to the call stack for processing. We will look at how
+              they are prioritised in the later slides.
+            </aside>
             <img
               src="./assets/event-loop.gif"
               alt="Working of the event loop"
@@ -94,6 +122,12 @@
 
           <!-- microtasks vs macrotasks -->
           <section>
+            <aside class="notes">
+              Microtasks and Macrotasks are two parts in the queue where async
+              functions are placed. The functions that go in and their priority
+              are defined in the JavaScript execution engine
+            </aside>
+
             <h3>Microtasks and Macrotasks</h3>
             <li class="fragment fade-up">
               Microtasks have a higher priority than Macrotasks
@@ -110,24 +144,34 @@
 
           <!-- show difference b/w Immediate and Timeout -->
           <section>
+            <aside class="notes">
+              What do you think should be the output of this code and why?
+            </aside>
+
             <pre><code data-trim class="language-javascript">
               setTimeout(() => {
-                console.log('4. Execution of Timeout Callback Function'); 
+                console.log('Execution of Timeout Callback Function'); 
               }, 10);
 
               setImmediate(() => {
-                  console.log('3. Execution of Immediate Callback Function'); 
+                  console.log('Execution of Immediate Callback Function'); 
               });
 
               process.nextTick(() => {
-                  console.log('2. Execution of NextTick Callback Function');
+                  console.log('Execution of NextTick Callback Function');
               });
 
-              console.log('1. Execution of Main Module Ends');
+              console.log('Execution of Main Module Ends');
             </code></pre>
           </section>
 
           <section>
+            <aside class="notes">
+              I have removed the <code>10</code> from the first
+              <code>setTimeout</code> call. Will there be any change in the
+              output?
+            </aside>
+
             <pre><code data-trim class="language-javascript">
               setTimeout(() => {
                 console.log('4. Execution of Timeout Callback Function'); 
@@ -146,40 +190,66 @@
           </section>
 
           <section>
-            Why is immediate always invoked before timeout?
-            <p class="fragment fade-up">
+            <aside class="notes">
+              Any idea why <code>setImmediate</code> is always invoked before
+              <code>setTimeout</code>?<br />
+
               <code>setImmediate</code> checks queue of I/O eventhandlers. If
               all I/O events in the current snapshot are processed, it executes
-              the callback
+              the callback<br />
+
+              <code>setTimeout</code> is executed after all the executing and
+              currently queued eventhandlers finish first. So immediate will
+              alwsys be executed before timeout regardless of where it resides
+              in code
+            </aside>
+
+            Why is immediate always invoked before timeout?
+            <p class="fragment fade-up">
+              <code>setImmediate</code> executes after all I/O events in the
+              current snapshot are processed
             </p>
             <p class="fragment fade-up">
               <code>setTimeout</code> is executed after all the executing and
-              currently queued eventhandlers finish first, so
+              currently queued eventhandlers finish first
+            </p>
+            <p class="fragment fade-up">
               <code>setImmediate</code> >>> <code>setTimeout</code>
             </p>
           </section>
 
           <section>
-            What about <code>process.nextTick</code> and Promises?
-            <p class="fragment fade-up">
-              Every time the event loop takes a full trip, we call it a tick
-            </p>
-            <p class="fragment fade-up">
+            <aside class="notes">
+              What about <code>process.nextTick</code> and Promises?<br />
+
+              Every time the event loop takes a full trip, we call it a tick.
               <code>nextTick()</code> makes sure that in the next event loop
               iteration that code is already executed. i.e. after all
-              synchronous code is executed and all handlers are queued
+              synchronous code is executed and all handlers are queued<br />
+
+              So does this mean <code>nextTick()</code> always executes before
+              Promises? It's never simple when JS is involved!
+            </aside>
+            What about <code>process.nextTick</code> and Promises?
+            <p class="fragment fade-up">
+              <code>nextTick()</code> is called after sync code and handler
+              queueing for the next loop (tick)
             </p>
             <p class="fragment fade-up">Is it actually that simple?</p>
-            <p class="fragment fade-up">With JavaScript, never!</p>
           </section>
 
           <section>
+            <aside class="notes">
+              Anyone here who doesn't know what CJS and ESM are?<br />
+              ESM supports something known as top-level await, where we can
+              write <code>await</code> at the top without using the
+              <code>async keyword</code>. So, when we run any script as ESM, the
+              script is already in the microtask phase because we are already in
+              an async context
+            </aside>
+
             CJS (CommonJS) and ESM (ECMAScript modules) behave differently
             <p class="fragment fade-up">ESM supports top-level await</p>
-            <p class="fragment fade-up">
-              So, when we run as ESM, the script is already in the microtask
-              phase
-            </p>
             <p class="fragment fade-up">
               CommonJS: <code>nextTick</code> >>> Promise chains
             </p>
@@ -195,30 +265,147 @@
 
           <!-- making sync functions async -->
           <section>
+            <aside class="notes">
+              Why is this bad? The function doesn't do anything asynchronous
+              (not calling an external API, reading the database etc.). This
+              unnecessarily blocks the event loop and the actual async functions
+              behind this are delayed
+            </aside>
+
             <p>Making sync functions async</p>
             <pre><code data-trim class="language-javascript">
-              // function doesn't do anything asynchronous
               async function printUserData(user) {
                 console.log(user.name)
               }
-
-              // blocks the event loop unnecessarily
               await printUserData({ name: 'John Doe' })
             </code></pre>
           </section>
 
           <section>
-            <p>Then chains for synchronous functions</p>
-            <pre><code data-trim class="language-javascript">
-              // function doesn't do anything asynchronous
-              async function printUserData(user) {
-                console.log(user.name)
+            <aside class="notes">
+              This is also an anti-pattern because the long
+              <code>then</code> chains are only used to make the code readable
+              or for flow control<br />
+              Just call the functions synchronously using JavaScripts built-in
+              <code>map</code> function
+            </aside>
+
+            <p><code>then</code> chains for synchronous functions</p>
+            <pre><code data-trim class="language-javascript" style="max-height: 450px;">
+              async function getData() {
+                return Promise.resolve(['one', 'two', 'three'])
               }
 
-              // blocks the event loop unnecessarily
-              await printUserData({ name: 'John Doe' })
+              function upper(data) {
+                return data.map(i => i.toUpperCase())
+              }
+
+              function reverse(data) {
+                return data.map(i => i.split('').reverse().join(''))
+              }
+
+              getData()
+                .then(toUpper)
+                .then(reverse)
+                .then(console.log)
             </code></pre>
           </section>
+
+          <section>
+            <aside class="notes">
+              This is an example from one of my previous projects that I worked
+              on. We were parsing a huge JSON file to get a list of registered
+              users and this is a short snippet of that code<br />
+
+              This created a promise chain for every record in the JSON and
+              hogged up a huge amount of memory. This was inefficient and
+              wasteful in terms of memory usage and performance<br />
+              There's also a better way if you need to perform async operations
+              on large amounts of data and that is using a library called
+              <code>p-map</code> where you can control how many concurrent
+              executions run at once
+            </aside>
+
+            <p>Using <code>async functions in loops</code></p>
+            <pre><code data-trim class="language-javascript" style="max-height: 450px;">
+              async function processJSON(json) {
+                return await Promise.all(data.map(async (user, index) => {
+                  // loop over each record and process
+                }));
+              }
+
+              processJSON().then(() => {
+                // send a response back to the client
+              })
+            </code></pre>
+          </section>
+
+          <section>
+            <aside class="notes">
+              What happens if we profile this function with traces to check the
+              performance? For the sake of time, I have already run this
+              <code>processJSON</code> file and created a tracing log generated
+              by the command here in <code>package.json</code>. This command
+              gives us the performance and async characteristics of our program
+              that we can check using Chrome<br />
+
+              If we load this file, here's what we get. Every single one of
+              these lines is a promse and they are being created in a
+              synchronous loop. And how do we know if it's synchronous and we
+              see the v8 execute block which shows that it's synchronous<br />
+
+              There is a timer here that is scheduling asynchronous activity but
+              we're still allocating all those promises at once and the
+              synchronous code running in those causes a massive event loop
+              block. The event loop cannot do anything else at that time
+            </aside>
+            An example of profiling such a function
+          </section>
+        </section>
+
+        <!-- takeaways -->
+        <section>
+          <aside class="notes">
+            So what are the takeways from this?<br />
+            <ul>
+              <li>Know when your code is being executed in the event loop</li>
+              <li>Do not make synchronous code asynchronous</li>
+              <li>
+                If you really need to create promises in loops, batch process
+                them with a library like <code>p-map</code>
+              </li>
+              <li>
+                As we saw in the <code>processJSON</code> function, promises are
+                high priority in the event loop microtask queue and that will
+                prevent other code from executing as these nested promises will
+                always be taken in first
+              </li>
+              <li>
+                And last but not the least, keep it simple! Synchronous
+                JavaScript is fast enough so we don't need to convert it into
+                promises
+              </li>
+            </ul>
+          </aside>
+          Takeaways
+          <ul>
+            <li class="fragment fade-up">
+              Know when your code is being executed
+            </li>
+            <li class="fragment fade-up">Do not use unexpected promises</li>
+            <li class="fragment fade-up">
+              Avoid mixing promises and callbacks
+            </li>
+            <li class="fragment fade-up">
+              Avoid creating promises in loops, batch process them
+            </li>
+            <li class="fragment fade-up">
+              Avoid long <code>then</code> chains
+            </li>
+            <li class="fragment fade-up">Avoid highly nested promises</li>
+            <li class="fragment fade-up">Profile your code</li>
+            <li class="fragment fade-up">KISS (Keep it simple)</li>
+          </ul>
         </section>
 
         <!-- the end -->

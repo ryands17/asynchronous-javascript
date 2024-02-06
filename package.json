@@ -4,7 +4,8 @@
   "description": "Understanding asynchronous JavaScript",
   "type": "module",
   "scripts": {
-    "slides": "serve -s slides"
+    "slides": "serve -s slides",
+    "part": "node --trace-event-categories=v8,node.async_hooks"
   },
   "keywords": [],
   "author": "Ryan Dsouza",

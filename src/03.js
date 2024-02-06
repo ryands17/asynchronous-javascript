@@ -10,7 +10,7 @@ new Promise(() => console.log('Execution of promise resolver 1'));
 
 new Promise((res) => {
   console.log('Execution of promise resolver 2');
-  res();
+  res(true);
 }).then(() => console.log('Execution of `then` chain resolver'));
 
 process.nextTick(() => {
