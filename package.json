@@ -5,18 +5,24 @@
   "type": "module",
   "scripts": {
     "slides": "serve -s slides",
-    "part": "node --trace-event-categories=v8,node.async_hooks"
+    "part": "node --trace-event-categories=v8,node.async_hooks",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "Ryan Dsouza",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.11.16",
+    "husky": "9",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "serve": "^14.2.1",
     "typescript": "^5.3.3"
   },
   "prettier": {
     "singleQuote": true
+  },
+  "lint-staged": {
+    "*.{js,json,md}": "prettier --write"
   }
 }
