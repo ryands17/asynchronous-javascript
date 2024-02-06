@@ -1,0 +1,21 @@
+{
+  "name": "async",
+  "version": "1.0.0",
+  "description": "Understanding asynchronous JavaScript",
+  "type": "module",
+  "scripts": {
+    "slides": "serve -s slides"
+  },
+  "keywords": [],
+  "author": "Ryan Dsouza",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "prettier": "^3.2.5",
+    "serve": "^14.2.1",
+    "typescript": "^5.3.3"
+  },
+  "prettier": {
+    "singleQuote": true
+  }
+}

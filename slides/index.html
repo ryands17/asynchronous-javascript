@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Understanding Asynchronous JavaScript</title>
+
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/league.css" id="theme" />
+
+    <!-- Theme used for syntax highlighted code -->
+    <link
+      rel="stylesheet"
+      href="plugin/highlight/monokai.css"
+      id="highlight-theme"
+    />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- talk slide -->
+        <section>
+          <h1>Understanding Asynchronous JavaScript</h1>
+        </section>
+
+        <!-- intro -->
+        <section>
+          <h2>Hello everyone 👋</h2>
+          <div>
+            I'm Ryan<br />
+            Tech Lead @ Shell Recharge Solutions<br />
+            TypeScript | GraphQL | 4x AWS | Rust
+          </div>
+        </section>
+
+        <!-- insert meme here -->
+        <section>
+          <img src="./assets/meme.jpg" alt="Promises meme" />
+        </section>
+
+        <!-- topics to be covered -->
+        <section>
+          <h2>Why Promises?</h2>
+          <ul>
+            <li class="fragment fade-up">Understanding the event loop</li>
+            <li class="fragment fade-up">
+              Functions corresponding to the event loop
+            </li>
+            <li class="fragment fade-up">
+              Things to be aware of when working with Promises
+            </li>
+          </ul>
+        </section>
+
+        <!-- Understanding the event loop -->
+        <section>
+          <section>
+            <h3>A basic example</h3>
+            <pre><code data-trim class="language-javascript">
+              setTimeout(() => { console.log(1) });
+
+              Promise.resolve().then(() => console.log(2));
+              
+              Promise.resolve().then(() =>
+                setTimeout(() => {
+                  console.log(3);
+                }),
+              );
+              
+              new Promise(() => console.log(4));
+              
+              setTimeout(() => { console.log(5) });              
+            </code></pre>
+          </section>
+
+          <section>
+            <img
+              src="./assets/event-loop.gif"
+              alt="Working of the event loop"
+            />
+          </section>
+        </section>
+
+        <!-- Diving into the fundamentals -->
+        <section>
+          <section>
+            <h3>Let's dive deep</h3>
+          </section>
+
+          <!-- microtasks vs macrotasks -->
+          <section>
+            <h3>Microtasks and Macrotasks</h3>
+            <li class="fragment fade-up">
+              Microtasks have a higher priority than Macrotasks
+            </li>
+            <li class="fragment fade-up">
+              Macrotasks: setTimeout, setInterval, setImmediate,
+              requestAnimationFrame, I/O, UI rendering
+            </li>
+            <li class="fragment fade-up">
+              Microtasks: process.nextTick, Promises, queueMicrotask,
+              MutationObserver
+            </li>
+          </section>
+
+          <!-- show difference b/w Immediate and Timeout -->
+          <section>
+            <pre><code data-trim class="language-javascript">
+              setTimeout(() => {
+                console.log('4. Execution of Timeout Callback Function'); 
+              }, 10);
+
+              setImmediate(() => {
+                  console.log('3. Execution of Immediate Callback Function'); 
+              });
+
+              process.nextTick(() => {
+                  console.log('2. Execution of NextTick Callback Function');
+              });
+
+              console.log('1. Execution of Main Module Ends');
+            </code></pre>
+          </section>
+
+          <section>
+            <pre><code data-trim class="language-javascript">
+              setTimeout(() => {
+                console.log('4. Execution of Timeout Callback Function'); 
+              });
+
+              setImmediate(() => {
+                  console.log('3. Execution of Immediate Callback Function'); 
+              });
+
+              process.nextTick(() => {
+                  console.log('2. Execution of NextTick Callback Function');
+              });
+
+              console.log('1. Execution of Main Module Ends');
+            </code></pre>
+          </section>
+
+          <section>
+            Why is immediate always invoked before timeout?
+            <p class="fragment fade-up">
+              <code>setImmediate</code> checks queue of I/O eventhandlers. If
+              all I/O events in the current snapshot are processed, it executes
+              the callback
+            </p>
+            <p class="fragment fade-up">
+              <code>setTimeout</code> is executed after all the executing and
+              currently queued eventhandlers finish first, so
+              <code>setImmediate</code> >>> <code>setTimeout</code>
+            </p>
+          </section>
+
+          <section>
+            What about <code>process.nextTick</code> and Promises?
+            <p class="fragment fade-up">
+              Every time the event loop takes a full trip, we call it a tick
+            </p>
+            <p class="fragment fade-up">
+              <code>nextTick()</code> makes sure that in the next event loop
+              iteration that code is already executed. i.e. after all
+              synchronous code is executed and all handlers are queued
+            </p>
+            <p class="fragment fade-up">Is it actually that simple?</p>
+            <p class="fragment fade-up">With JavaScript, never!</p>
+          </section>
+
+          <section>
+            CJS (CommonJS) and ESM (ECMAScript modules) behave differently
+            <p class="fragment fade-up">ESM supports top-level await</p>
+            <p class="fragment fade-up">
+              So, when we run as ESM, the script is already in the microtask
+              phase
+            </p>
+            <p class="fragment fade-up">
+              CommonJS: <code>nextTick</code> >>> Promise chains
+            </p>
+            <p class="fragment fade-up">
+              ESM: Promise chains >>> <code>nextTick</code>
+            </p>
+          </section>
+        </section>
+
+        <!-- using promises incorrectly -->
+        <section>
+          <section><h3>Examples of not using Promises correctly</h3></section>
+
+          <!-- making sync functions async -->
+          <section>
+            <p>Making sync functions async</p>
+            <pre><code data-trim class="language-javascript">
+              // function doesn't do anything asynchronous
+              async function printUserData(user) {
+                console.log(user.name)
+              }
+
+              // blocks the event loop unnecessarily
+              await printUserData({ name: 'John Doe' })
+            </code></pre>
+          </section>
+
+          <section>
+            <p>Then chains for synchronous functions</p>
+            <pre><code data-trim class="language-javascript">
+              // function doesn't do anything asynchronous
+              async function printUserData(user) {
+                console.log(user.name)
+              }
+
+              // blocks the event loop unnecessarily
+              await printUserData({ name: 'John Doe' })
+            </code></pre>
+          </section>
+        </section>
+
+        <!-- the end -->
+        <section>
+          <h2>Thank you :)</h2>
+          <img src="./assets/repository.png" height="280" width="280" />
+          <h3>Reach me @</h3>
+          <ul>
+            <li>
+              <a
+                href="https://www.linkedin.com/in/ryan-dsouza-880522125/"
+                rel="noopener noreferrer"
+                target="_blank"
+                >LinkedIn</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://twitter.com/ryands1701"
+                rel="noopener noreferrer"
+                target="_blank"
+                >ryands1701</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://dev.to/ryands17"
+                rel="noopener noreferrer"
+                target="_blank"
+                >Dev.to</a
+              >
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <script type="module">
+      // More info about initialization & config:
+      // - https://revealjs.com/config/
+      // - https://revealjs.com/initialization/
+      import Reveal from '/dist/reveal.esm.js';
+      import RevealHighlight from '/plugin/highlight/highlight.esm.js';
+      import RevealNotes from '/plugin/notes/notes.esm.js';
+      Reveal.initialize({
+        hash: true,
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
+</html>
