@@ -148,19 +148,25 @@
               What do you think should be the output of this code and why?
             </aside>
 
-            <pre><code data-trim class="language-javascript">
+            <pre><code data-trim class="language-javascript" style="max-height: 500px;">
+              //normal code > microtask > macrotask > macrotask(with timer)
+              
+              // macrotask
               setTimeout(() => {
                 console.log('Execution of Timeout Callback Function'); 
               }, 10);
 
+              // macrotask
               setImmediate(() => {
                   console.log('Execution of Immediate Callback Function'); 
               });
 
+              // microtask
               process.nextTick(() => {
                   console.log('Execution of NextTick Callback Function');
               });
 
+              // normal code
               console.log('Execution of Main Module Ends');
             </code></pre>
           </section>
@@ -172,20 +178,26 @@
               output?
             </aside>
 
-            <pre><code data-trim class="language-javascript">
+            <pre><code data-trim class="language-javascript" style="max-height: 500px;">
+              //normal code > microtask > macrotask
+              
+              // macrotask
               setTimeout(() => {
-                console.log('4. Execution of Timeout Callback Function'); 
+                console.log('Execution of Timeout Callback Function'); 
               });
 
+              // macrotask
               setImmediate(() => {
-                  console.log('3. Execution of Immediate Callback Function'); 
+                  console.log('Execution of Immediate Callback Function'); 
               });
 
+              // microtask
               process.nextTick(() => {
-                  console.log('2. Execution of NextTick Callback Function');
+                  console.log('Execution of NextTick Callback Function');
               });
 
-              console.log('1. Execution of Main Module Ends');
+              // normal code
+              console.log('Execution of Main Module Ends');
             </code></pre>
           </section>
 
@@ -240,7 +252,8 @@
 
           <section>
             <aside class="notes">
-              Anyone here who doesn't know what CJS and ESM are?<br />
+              Anyone here who doesn't know what CJS and ESM are? This is similar
+              to Python2 vs Python3 upgrade issue<br />
               ESM supports something known as top-level await, where we can
               write <code>await</code> at the top without using the
               <code>async keyword</code>. So, when we run any script as ESM, the
@@ -266,6 +279,9 @@
           <!-- making sync functions async -->
           <section>
             <aside class="notes">
+              This is a synchronous function but we have marked it as
+              asynchronous using the <code>async</code> keyword before the
+              function<br />
               Why is this bad? The function doesn't do anything asynchronous
               (not calling an external API, reading the database etc.). This
               unnecessarily blocks the event loop and the actual async functions
@@ -277,7 +293,23 @@
               async function printUserData(user) {
                 console.log(user.name)
               }
+
               await printUserData({ name: 'John Doe' })
+            </code></pre>
+          </section>
+
+          <section>
+            <aside class="notes">
+              Remove the <code>async</code> and <code>await</code>
+            </aside>
+
+            <p>Solution</p>
+            <pre><code data-trim class="language-javascript">
+              function printUserData(user) {
+                console.log(user.name)
+              }
+
+              printUserData({ name: 'John Doe' })
             </code></pre>
           </section>
 
@@ -286,8 +318,6 @@
               This is also an anti-pattern because the long
               <code>then</code> chains are only used to make the code readable
               or for flow control<br />
-              Just call the functions synchronously using JavaScripts built-in
-              <code>map</code> function
             </aside>
 
             <p><code>then</code> chains for synchronous functions</p>
@@ -305,10 +335,35 @@
               }
 
               getData()
-                .then(toUpper)
+                .then(upper)
                 .then(reverse)
                 .then(console.log)
             </code></pre>
+          </section>
+
+          <section>
+            <aside class="notes">
+              Just call the functions synchronously using JavaScripts built-in
+              <code>map</code> function
+            </aside>
+
+            <p>Solution</p>
+            <pre><code data-trim class="language-javascript" style="max-height: 480px;">
+            async function getData() {
+              return Promise.resolve(['one', 'two', 'three'])
+            }
+
+            function upper(data) {
+              return data.map(i => i.toUpperCase())
+            }
+
+            function reverse(data) {
+              return data.map(i => i.split('').reverse().join(''))
+            }
+
+            const data = reverse(upper(await getData()));
+            console.log(data);
+          </code></pre>
           </section>
 
           <section>
@@ -360,6 +415,25 @@
               block. The event loop cannot do anything else at that time
             </aside>
             An example of profiling such a function
+          </section>
+
+          <section>
+            <p>Solution</p>
+
+            <ul>
+              <li class="fragment fade-up">
+                Avoid promises inside loops if your function is synchronous
+              </li>
+              <li class="fragment fade-up">
+                If you really need asynchronous functions, process in batches
+                them using a library like
+                <a
+                  href="https://github.com/sindresorhus/p-map?tab=readme-ov-file#usage"
+                  target="_blank"
+                  >p-map</a
+                >
+              </li>
+            </ul>
           </section>
         </section>
 
